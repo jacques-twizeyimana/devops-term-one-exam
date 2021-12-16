@@ -53,22 +53,14 @@ public class CityUtilTest {
                 .findAny().isPresent());
 
     }
-
     @Test
     public void testSpying() {
-        List<City> cityList = new ArrayList<>();
-        List<City> spyCityList = Mockito.spy(cityList);
+        List<City> spyList = Mockito.spy(ArrayList.class);
+        City city = new City("Kigali", 24);
+        spyList.add(city);
+        Mockito.verify(spyList).add(city);
 
-
-        spyCityList.add(new City("Kigali",24));
-        spyCityList.add(new City("Chicago",12));
-
-        Mockito.verify(spyCityList).add(new City("Kigali",24));
-        Mockito.verify(spyCityList).add(new City("Chicago",12));
-
-        System.out.println(spyCityList.size());
-
-        assertEquals(2, spyCityList.size());
+        assertEquals(1, spyList.size());
     }
 
     @Test
