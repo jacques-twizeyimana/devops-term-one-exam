@@ -1,26 +1,27 @@
 package rw.ac.rca.termOneExam.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import rw.ac.rca.termOneExam.domain.City;
+import rw.ac.rca.termOneExam.repository.ICityRepository;
 import rw.ac.rca.termOneExam.service.CityService;
 
+import java.util.ArrayList;
 import java.util.List;
 
-
-@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CityUtilTest {
     @Autowired
     private CityService cityService;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    @Mock
+    private ICityRepository mockCityRepository;
 
     @Test
     public void MoreThan40Weather() {
@@ -40,15 +41,44 @@ public class CityUtilTest {
     }
 
     @Test
-    public void citiesContainKigaliAndMusanze() throws JSONException {
-        String response = this.restTemplate.getForObject("/api/cities/all", String.class);
-        System.out.println(response);
+    public void citiesContainKigaliAndMusanze() {
+        List<City> cities = cityService.getAll();
 
-        assertTrue(response.contains("101"));
-        assertTrue(response.contains("Kigali"));
+        assertTrue(cities.stream()
+                .filter(city -> "Musanze".equals(city.getName()))
+                .findAny().isPresent());
 
-        assertTrue(response.contains("102"));
-        assertTrue(response.contains("Musanze"));
+        assertTrue(cities.stream()
+                .filter(city -> "Kigali".equals(city.getName()))
+                .findAny().isPresent());
+
+    }
+
+    @Test
+    public void testSpying() {
+        List<City> cityList = new ArrayList<>();
+        List<City> spyCityList = Mockito.spy(cityList);
+
+
+        spyCityList.add(new City("Kigali",24));
+        spyCityList.add(new City("Chicago",12));
+
+        Mockito.verify(spyCityList).add(new City("Kigali",24));
+        Mockito.verify(spyCityList).add(new City("Chicago",12));
+
+        System.out.println(spyCityList.size());
+
+        assertEquals(2, spyCityList.size());
+    }
+
+    @Test
+    public void testMocking() {
+
+        Mockito.when(mockCityRepository.count()).thenReturn(11L);
+        long numberOfCities = mockCityRepository.count();
+
+        assertEquals(11l,numberOfCities);
+        Mockito.verify(mockCityRepository).count();
     }
 
 }

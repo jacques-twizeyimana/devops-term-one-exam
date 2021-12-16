@@ -16,6 +16,8 @@ import rw.ac.rca.termOneExam.domain.City;
 import rw.ac.rca.termOneExam.dto.CreateCityDTO;
 import rw.ac.rca.termOneExam.repository.ICityRepository;
 
+import static org.mockito.ArgumentMatchers.*;
+
 @RunWith(MockitoJUnitRunner.class)
 public class CityServiceTest {
 
@@ -56,21 +58,29 @@ public class CityServiceTest {
         assertTrue(cityService.existsByName(city.getName()));
 
     }
+
     @Test
-    public void saveCitySuccess () {
+    public void existByName_success() {
+        when(cityRepositoryMock.existsByName("Kigali")).thenReturn(true);
 
-        City city = new City("California",20);
+        assertEquals(true, cityService.existsByName("Kigali"));
+    }
 
-        CreateCityDTO createCity = new CreateCityDTO();
-        createCity.setName("California");
-        createCity.setWeather(20);
+    @Test
+    public void existByName_fail() {
+        when(cityRepositoryMock.existsByName("Huye")).thenReturn(false);
 
-        when(cityRepositoryMock.findById(1l)).thenReturn(Optional.empty());
-        when(cityRepositoryMock.save(city)).thenReturn(city);
+        assertEquals(false, cityService.existsByName("Huye"));
+    }
 
-        City response = cityService.save(createCity);
-        System.out.println(response);
+    @Test
+    public void createCity_success() {
+        CreateCityDTO cityDTO = new CreateCityDTO();
+        cityDTO.setName("Texas");
+        cityDTO.setWeather(32);
 
-        assertEquals("California",response.getName());
+        when(cityRepositoryMock.save(any(City.class))).thenReturn(new City(cityDTO.getName(),cityDTO.getWeather()));
+
+        assertEquals(cityDTO.getName(), cityService.save(cityDTO).getName());
     }
 }
